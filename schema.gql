@@ -1,0 +1,4 @@
+type Player {
+    Name: string
+    ID: |
+}

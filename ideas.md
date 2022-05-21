@@ -1,0 +1,4 @@
+- Save voting events to display an animation to show the results
+- Avatar generator
+- Dual language
+- Word generators
