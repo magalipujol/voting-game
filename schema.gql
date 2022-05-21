@@ -1,4 +1,42 @@
+union RoomState = Voting | VoteCounting
+
+type Room {
+    id: ID!
+    players: [Player!]!
+    votes: [Vote!]!
+    state: RoomState!
+    options: [Option!]!
+}
+
+type Option {
+    value: String!
+}
+
 type Player {
-    Name: string
-    ID: |
+    id: ID!
+    name: String!
+    room: Room!
+}
+
+type Vote {
+    player: Player!
+    room: Room!
+    option: Option!
+    timeStamp: String!
+}
+
+type Query {
+    rooms: [Room!]!
+    room(id: ID!): Room
+}
+
+type Mutation {
+    createRoom(name: String!): Room!
+    createPlayer(name: String!): Player!
+    joinRoom(id: ID!): Room!
+    startGame(roomId: ID!): Room!
+    vote(playerId: ID!, option: String!): Room!
+    leaveRoom(id: ID!): Room
+    deletePlayer(id: ID!): Player
+    deleteRoom(id: ID!): Room
 }
