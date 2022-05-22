@@ -8,9 +8,13 @@ import { DefaultApolloClient } from '@vue/apollo-composable'
 
 const cache = new InMemoryCache()
 
+
 const apolloClient = new ApolloClient({
-  uri: 'https://localhost:8080/',
+  uri: 'http://localhost:8080/',
   cache,
+  fetchOptions: {
+      mode: 'no-cors'
+  }
 })
 
 
