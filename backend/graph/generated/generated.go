@@ -49,7 +49,7 @@ type ComplexityRoot struct {
 		CreateRoom   func(childComplexity int, name string) int
 		DeletePlayer func(childComplexity int, id string) int
 		DeleteRoom   func(childComplexity int, id string) int
-		JoinRoom     func(childComplexity int, id string) int
+		JoinRoom     func(childComplexity int, playerID string, roomID string) int
 		LeaveRoom    func(childComplexity int, id string) int
 		StartGame    func(childComplexity int, roomID string) int
 		Vote         func(childComplexity int, playerID string, option string) int
@@ -89,7 +89,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	CreateRoom(ctx context.Context, name string) (*model.Room, error)
 	CreatePlayer(ctx context.Context, name string) (*model.Player, error)
-	JoinRoom(ctx context.Context, id string) (*model.Room, error)
+	JoinRoom(ctx context.Context, playerID string, roomID string) (*model.Room, error)
 	StartGame(ctx context.Context, roomID string) (*model.Room, error)
 	Vote(ctx context.Context, playerID string, option string) (*model.Room, error)
 	LeaveRoom(ctx context.Context, id string) (*model.Room, error)
@@ -174,7 +174,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.JoinRoom(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.JoinRoom(childComplexity, args["playerId"].(string), args["roomId"].(string)), true
 
 	case "Mutation.leaveRoom":
 		if e.complexity.Mutation.LeaveRoom == nil {
@@ -422,7 +422,7 @@ type Query {
 type Mutation {
     createRoom(name: String!): Room!
     createPlayer(name: String!): Player!
-    joinRoom(id: ID!): Room!
+    joinRoom(playerId: ID!, roomId: ID!): Room!
     startGame(roomId: ID!): Room!
     vote(playerId: ID!, option: String!): Room!
     leaveRoom(id: ID!): Room
@@ -501,14 +501,23 @@ func (ec *executionContext) field_Mutation_joinRoom_args(ctx context.Context, ra
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["playerId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("playerId"))
 		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["playerId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["roomId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("roomId"))
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["roomId"] = arg1
 	return args, nil
 }
 
@@ -778,7 +787,7 @@ func (ec *executionContext) _Mutation_joinRoom(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().JoinRoom(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Mutation().JoinRoom(rctx, fc.Args["playerId"].(string), fc.Args["roomId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

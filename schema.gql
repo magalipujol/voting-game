@@ -31,7 +31,7 @@ type Query {
 type Mutation {
     createRoom(name: String!): Room!
     createPlayer(name: String!): Player!
-    joinRoom(id: ID!): Room!
+    joinRoom(playerId: ID!, roomId: ID!): Room!
     startGame(roomId: ID!): Room!
     vote(playerId: ID!, option: String!): Room!
     leaveRoom(id: ID!): Room

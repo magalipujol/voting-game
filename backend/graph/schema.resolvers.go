@@ -18,7 +18,7 @@ func (r *mutationResolver) CreatePlayer(ctx context.Context, name string) (*mode
 	return r.playerRepository.CreatePlayer(ctx, name)
 }
 
-func (r *mutationResolver) JoinRoom(ctx context.Context, id string) (*model.Room, error) {
+func (r *mutationResolver) JoinRoom(ctx context.Context, playerID string, roomID string) (*model.Room, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
