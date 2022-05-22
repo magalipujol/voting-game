@@ -1,6 +1,6 @@
 <script setup>
 
-import { watch } from 'vue'
+import { watch, computed } from 'vue'
 import {useQuery} from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 console.log("AAAAAAAAAAAAAAAAAAA")
@@ -20,11 +20,14 @@ const allRoomsQuery = gql`
 
 const { result } = useQuery(allRoomsQuery);
 console.log("BBBBBBBBBBBBBBBB")
+const rooms = computed(() => result ?? {})
+console.log(rooms)
 
- watch(result, value => {
+ watch(rooms, value => {
    console.log("Mirando")
       console.log(value)
     })
+console.log("CCCCCCCCCCCC")
 
 </script>
 
