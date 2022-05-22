@@ -3,6 +3,7 @@ package main
 import (
 	"api/graph"
 	"api/graph/generated"
+	"api/repository"
 	"log"
 	"net/http"
 	"os"
@@ -19,7 +20,10 @@ func main() {
 		port = defaultPort
 	}
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
+		PlayerRepository: repository.NewPlayerRepository(),
+		RoomRepository:   repository.NewRoomRepository(),
+	}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)

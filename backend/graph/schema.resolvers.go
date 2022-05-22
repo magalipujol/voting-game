@@ -11,27 +11,27 @@ import (
 )
 
 func (r *mutationResolver) CreateRoom(ctx context.Context, name string) (*model.Room, error) {
-	return r.roomRepository.Create(ctx, name)
+	return r.RoomRepository.Create(ctx, name)
 }
 
 func (r *mutationResolver) CreatePlayer(ctx context.Context, name string) (*model.Player, error) {
-	return r.playerRepository.Create(ctx, name)
+	return r.PlayerRepository.Create(ctx, name)
 }
 
 func (r *mutationResolver) JoinRoom(ctx context.Context, playerID string, roomID string) (*model.Room, error) {
-	player, err := r.playerRepository.Get(ctx, playerID)
+	player, err := r.PlayerRepository.Get(ctx, playerID)
 	if err != nil {
 		return nil, err
 	}
-	return r.roomRepository.Join(ctx, player, roomID)
+	return r.RoomRepository.Join(ctx, player, roomID)
 }
 
 func (r *mutationResolver) StartGame(ctx context.Context, roomID string) (*model.Room, error) {
-	return r.roomRepository.StartGame(ctx, roomID)
+	return r.RoomRepository.StartGame(ctx, roomID)
 }
 
 func (r *mutationResolver) Vote(ctx context.Context, playerID string, option string) (*model.Room, error) {
-	return r.roomRepository.Vote(ctx, playerID, option)
+	return r.RoomRepository.Vote(ctx, playerID, option)
 }
 
 func (r *mutationResolver) LeaveRoom(ctx context.Context, id string) (*model.Room, error) {
@@ -39,7 +39,7 @@ func (r *mutationResolver) LeaveRoom(ctx context.Context, id string) (*model.Roo
 }
 
 func (r *mutationResolver) DeletePlayer(ctx context.Context, id string) (*model.Player, error) {
-	return r.playerRepository.Delete(ctx, id)
+	return r.PlayerRepository.Delete(ctx, id)
 }
 
 func (r *mutationResolver) DeleteRoom(ctx context.Context, id string) (*model.Room, error) {
@@ -47,11 +47,11 @@ func (r *mutationResolver) DeleteRoom(ctx context.Context, id string) (*model.Ro
 }
 
 func (r *queryResolver) Rooms(ctx context.Context) ([]*model.Room, error) {
-	return r.roomRepository.List(ctx)
+	return r.RoomRepository.List(ctx)
 }
 
 func (r *queryResolver) Room(ctx context.Context, id string) (*model.Room, error) {
-	return r.roomRepository.Get(ctx, id)
+	return r.RoomRepository.Get(ctx, id)
 }
 
 // Mutation returns generated.MutationResolver implementation.

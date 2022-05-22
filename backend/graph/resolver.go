@@ -7,6 +7,6 @@ import "api/repository"
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	playerRepository repository.PlayerRepository
-	roomRepository   repository.RoomRepository
+	PlayerRepository repository.PlayerRepository
+	RoomRepository   repository.RoomRepository
 }
