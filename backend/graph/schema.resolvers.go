@@ -15,7 +15,7 @@ func (r *mutationResolver) CreateRoom(ctx context.Context, name string) (*model.
 }
 
 func (r *mutationResolver) CreatePlayer(ctx context.Context, name string) (*model.Player, error) {
-	return r.playerRepository.CreatePlayer(ctx, name)
+	return r.playerRepository.Create(ctx, name)
 }
 
 func (r *mutationResolver) JoinRoom(ctx context.Context, playerID string, roomID string) (*model.Room, error) {
@@ -39,7 +39,7 @@ func (r *mutationResolver) LeaveRoom(ctx context.Context, id string) (*model.Roo
 }
 
 func (r *mutationResolver) DeletePlayer(ctx context.Context, id string) (*model.Player, error) {
-	return r.playerRepository.DeletePlayer(ctx, id)
+	return r.playerRepository.Delete(ctx, id)
 }
 
 func (r *mutationResolver) DeleteRoom(ctx context.Context, id string) (*model.Room, error) {
