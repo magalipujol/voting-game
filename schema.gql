@@ -1,10 +1,8 @@
-union RoomState = Voting | VoteCounting
-
 type Room {
     id: ID!
     players: [Player!]!
     votes: [Vote!]!
-    state: RoomState!
+    voting: Boolean!
     options: [Option!]!
 }
 
