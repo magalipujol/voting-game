@@ -93,7 +93,38 @@ func (r *roomRepositoryInMemory) StartGame(ctx context.Context, roomID string) (
 }
 
 func (r *roomRepositoryInMemory) Vote(ctx context.Context, playerID string, option string) (*model.Room, error) {
-	panic(fmt.Errorf("not implemented"))
+	var player *model.Player
+	var room *model.Room
+
+	for _, searchingRoom := range r.rooms {
+		for _, playerInRoom := range searchingRoom.Players {
+			if playerInRoom.ID == playerID {
+				player = playerInRoom
+				room = searchingRoom
+				break
+			}
+		}
+	}
+	if player == nil {
+		return nil, fmt.Errorf("player not found")
+	}
+
+	for _, vote := range room.Votes {
+		if vote.Player.ID == player.ID {
+			return nil, fmt.Errorf("player already voted")
+		}
+	}
+
+	room.Votes = append(room.Votes, &model.Vote{
+		Player: player,
+		Option: &model.Option{
+			Value: option,
+		},
+		Room:      room,
+		TimeStamp: time.Now().UTC().Format(time.RFC3339),
+	})
+
+	return room, nil
 }
 
 func (r *roomRepositoryInMemory) Leave(ctx context.Context, id string) (*model.Room, error) {

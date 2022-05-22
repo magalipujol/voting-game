@@ -31,7 +31,7 @@ func (r *mutationResolver) StartGame(ctx context.Context, roomID string) (*model
 }
 
 func (r *mutationResolver) Vote(ctx context.Context, playerID string, option string) (*model.Room, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.roomRepository.Vote(ctx, playerID, option)
 }
 
 func (r *mutationResolver) LeaveRoom(ctx context.Context, id string) (*model.Room, error) {
