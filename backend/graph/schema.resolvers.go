@@ -10,28 +10,12 @@ import (
 	"fmt"
 )
 
-var players = map[string]*model.Player{}
-var rooms = map[string]*model.Room{}
-
 func (r *mutationResolver) CreateRoom(ctx context.Context, name string) (*model.Room, error) {
-	room := &model.Room{
-		ID:      fmt.Sprintf("%d", len(rooms)+1),
-		Players: []*model.Player{},
-		Votes:   []*model.Vote{},
-		Voting:  false,
-		Options: []*model.Option{},
-	}
-	rooms[room.ID] = room
-	return room, nil
+	return r.roomRepository.Create(ctx, name)
 }
 
 func (r *mutationResolver) CreatePlayer(ctx context.Context, name string) (*model.Player, error) {
-	player := &model.Player{
-		ID:   fmt.Sprintf("%d", len(players)+1),
-		Name: name,
-	}
-	players[player.ID] = player
-	return player, nil
+	return r.playerRepository.CreatePlayer(ctx, name)
 }
 
 func (r *mutationResolver) JoinRoom(ctx context.Context, id string) (*model.Room, error) {
@@ -51,8 +35,7 @@ func (r *mutationResolver) LeaveRoom(ctx context.Context, id string) (*model.Roo
 }
 
 func (r *mutationResolver) DeletePlayer(ctx context.Context, id string) (*model.Player, error) {
-	delete(players, id)
-	return nil, nil
+	return r.playerRepository.DeletePlayer(ctx, id)
 }
 
 func (r *mutationResolver) DeleteRoom(ctx context.Context, id string) (*model.Room, error) {
@@ -60,19 +43,11 @@ func (r *mutationResolver) DeleteRoom(ctx context.Context, id string) (*model.Ro
 }
 
 func (r *queryResolver) Rooms(ctx context.Context) ([]*model.Room, error) {
-	roomsArray := make([]*model.Room, 0, len(rooms))
-	for _, room := range rooms {
-		roomsArray = append(roomsArray, room)
-	}
-	return roomsArray, nil
+	return r.roomRepository.List(ctx)
 }
 
 func (r *queryResolver) Room(ctx context.Context, id string) (*model.Room, error) {
-	room, ok := rooms[id]
-	if !ok {
-		return nil, fmt.Errorf("room not found")
-	}
-	return room, nil
+	return r.roomRepository.Get(ctx, id)
 }
 
 // Mutation returns generated.MutationResolver implementation.
