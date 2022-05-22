@@ -19,7 +19,11 @@ func (r *mutationResolver) CreatePlayer(ctx context.Context, name string) (*mode
 }
 
 func (r *mutationResolver) JoinRoom(ctx context.Context, playerID string, roomID string) (*model.Room, error) {
-	panic(fmt.Errorf("not implemented"))
+	player, err := r.playerRepository.Get(ctx, playerID)
+	if err != nil {
+		return nil, err
+	}
+	return r.roomRepository.Join(ctx, player, roomID)
 }
 
 func (r *mutationResolver) StartGame(ctx context.Context, roomID string) (*model.Room, error) {

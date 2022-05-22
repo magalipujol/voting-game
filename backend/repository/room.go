@@ -11,10 +11,10 @@ type RoomRepository interface {
 	Get(ctx context.Context, id string) (*model.Room, error)
 	Create(ctx context.Context, name string) (*model.Room, error)
 	Delete(ctx context.Context, id string) (*model.Room, error)
-	JoinRoom(ctx context.Context, id string) (*model.Room, error)
+	Join(ctx context.Context, player *model.Player, roomID string) (*model.Room, error)
 	StartGame(ctx context.Context, roomID string) (*model.Room, error)
 	Vote(ctx context.Context, playerID string, option string) (*model.Room, error)
-	LeaveRoom(ctx context.Context, id string) (*model.Room, error)
+	Leave(ctx context.Context, id string) (*model.Room, error)
 }
 
 type roomRepositoryInMemory struct {
@@ -60,8 +60,15 @@ func (r *roomRepositoryInMemory) Delete(ctx context.Context, id string) (*model.
 	return nil, nil
 }
 
-func (r *roomRepositoryInMemory) JoinRoom(ctx context.Context, id string) (*model.Room, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *roomRepositoryInMemory) Join(ctx context.Context, player *model.Player, roomID string) (*model.Room, error) {
+	playersInRoom := r.rooms[roomID].Players
+	for _, playerInRoom := range playersInRoom {
+		if playerInRoom.ID == player.ID {
+			return nil, fmt.Errorf("player already in room")
+		}
+	}
+	r.rooms[roomID].Players = append(r.rooms[roomID].Players, player)
+	return r.rooms[roomID], nil
 }
 
 func (r *roomRepositoryInMemory) StartGame(ctx context.Context, roomID string) (*model.Room, error) {
@@ -72,6 +79,6 @@ func (r *roomRepositoryInMemory) Vote(ctx context.Context, playerID string, opti
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *roomRepositoryInMemory) LeaveRoom(ctx context.Context, id string) (*model.Room, error) {
+func (r *roomRepositoryInMemory) Leave(ctx context.Context, id string) (*model.Room, error) {
 	panic(fmt.Errorf("not implemented"))
 }
