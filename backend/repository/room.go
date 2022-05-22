@@ -4,6 +4,7 @@ import (
 	"api/graph/model"
 	"context"
 	"fmt"
+	"time"
 )
 
 type RoomRepository interface {
@@ -72,7 +73,23 @@ func (r *roomRepositoryInMemory) Join(ctx context.Context, player *model.Player,
 }
 
 func (r *roomRepositoryInMemory) StartGame(ctx context.Context, roomID string) (*model.Room, error) {
-	panic(fmt.Errorf("not implemented"))
+	room := r.rooms[roomID]
+	if room.Voting {
+		return nil, fmt.Errorf("game already started")
+	}
+	room.Voting = true
+	go func() {
+		intervalCheckTime := time.Second
+		votingFinishTime := time.Now().Add(10 * time.Second)
+		for votingFinishTime.Before(time.Now()) {
+			if len(room.Votes) == len(room.Players) {
+				break
+			}
+			time.Sleep(intervalCheckTime)
+		}
+		room.Voting = false
+	}()
+	return room, nil
 }
 
 func (r *roomRepositoryInMemory) Vote(ctx context.Context, playerID string, option string) (*model.Room, error) {
