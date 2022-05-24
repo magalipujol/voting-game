@@ -1,3 +1,8 @@
+# Code Generation: interfaces for typescript
+- `npm run graphql-codegen --config codegen.yml`
+- [GraphQL code generator](https://www.graphql-code-generator.com/)
+- [Excellent video](https://www.youtube.com/watch?v=kfXwbQIdRHs)
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
