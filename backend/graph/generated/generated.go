@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -38,6 +39,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -78,6 +80,10 @@ type ComplexityRoot struct {
 		Voting  func(childComplexity int) int
 	}
 
+	Subscription struct {
+		Room func(childComplexity int, id string) int
+	}
+
 	Vote struct {
 		Option    func(childComplexity int) int
 		Player    func(childComplexity int) int
@@ -99,6 +105,9 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Rooms(ctx context.Context) ([]*model.Room, error)
 	Room(ctx context.Context, id string) (*model.Room, error)
+}
+type SubscriptionResolver interface {
+	Room(ctx context.Context, id string) (<-chan *model.Room, error)
 }
 
 type executableSchema struct {
@@ -294,6 +303,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Room.Voting(childComplexity), true
 
+	case "Subscription.room":
+		if e.complexity.Subscription.Room == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_room_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.Room(childComplexity, args["id"].(string)), true
+
 	case "Vote.option":
 		if e.complexity.Vote.Option == nil {
 			break
@@ -363,6 +384,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next(ctx)
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -390,44 +428,48 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "../schema.gql", Input: `type Room {
-    id: ID!
-    players: [Player!]!
-    votes: [Vote!]!
-    voting: Boolean!
-    options: [Option!]!
+  id: ID!
+  players: [Player!]!
+  votes: [Vote!]!
+  voting: Boolean!
+  options: [Option!]!
 }
 
 type Option {
-    value: String!
+  value: String!
 }
 
 type Player {
-    id: ID!
-    name: String!
-    room: Room!
+  id: ID!
+  name: String!
+  room: Room!
 }
 
 type Vote {
-    player: Player!
-    room: Room!
-    option: Option!
-    timeStamp: String!
+  player: Player!
+  room: Room!
+  option: Option!
+  timeStamp: String!
 }
 
 type Query {
-    rooms: [Room!]!
-    room(id: ID!): Room
+  rooms: [Room!]!
+  room(id: ID!): Room
 }
 
 type Mutation {
-    createRoom(name: String!): Room!
-    createPlayer(name: String!): Player!
-    joinRoom(playerId: ID!, roomId: ID!): Room!
-    startGame(roomId: ID!): Room!
-    vote(playerId: ID!, option: String!): Room!
-    leaveRoom(id: ID!): Room
-    deletePlayer(id: ID!): Player
-    deleteRoom(id: ID!): Room
+  createRoom(name: String!): Room!
+  createPlayer(name: String!): Player!
+  joinRoom(playerId: ID!, roomId: ID!): Room!
+  startGame(roomId: ID!): Room!
+  vote(playerId: ID!, option: String!): Room!
+  leaveRoom(id: ID!): Room
+  deletePlayer(id: ID!): Player
+  deleteRoom(id: ID!): Room
+}
+
+type Subscription {
+  room(id: ID!): Room
 }
 `, BuiltIn: false},
 }
@@ -591,6 +633,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 }
 
 func (ec *executionContext) field_Query_room_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_room_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1837,6 +1894,80 @@ func (ec *executionContext) fieldContext_Room_options(ctx context.Context, field
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Option", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_room(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	fc, err := ec.fieldContext_Subscription_room(ctx, field)
+	if err != nil {
+		return nil
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().Room(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		return nil
+	}
+	return func(ctx context.Context) graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *model.Room)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalORoom2ᚖapiᚋgraphᚋmodelᚐRoom(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) fieldContext_Subscription_room(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Room_id(ctx, field)
+			case "players":
+				return ec.fieldContext_Room_players(ctx, field)
+			case "votes":
+				return ec.fieldContext_Room_votes(ctx, field)
+			case "voting":
+				return ec.fieldContext_Room_voting(ctx, field)
+			case "options":
+				return ec.fieldContext_Room_options(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Room", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Subscription_room_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -4124,6 +4255,26 @@ func (ec *executionContext) _Room(ctx context.Context, sel ast.SelectionSet, obj
 		return graphql.Null
 	}
 	return out
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "room":
+		return ec._Subscription_room(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
 }
 
 var voteImplementors = []string{"Vote"}

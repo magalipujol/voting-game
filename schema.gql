@@ -1,40 +1,44 @@
 type Room {
-    id: ID!
-    players: [Player!]!
-    votes: [Vote!]!
-    voting: Boolean!
-    options: [Option!]!
+  id: ID!
+  players: [Player!]!
+  votes: [Vote!]!
+  voting: Boolean!
+  options: [Option!]!
 }
 
 type Option {
-    value: String!
+  value: String!
 }
 
 type Player {
-    id: ID!
-    name: String!
-    room: Room!
+  id: ID!
+  name: String!
+  room: Room!
 }
 
 type Vote {
-    player: Player!
-    room: Room!
-    option: Option!
-    timeStamp: String!
+  player: Player!
+  room: Room!
+  option: Option!
+  timeStamp: String!
 }
 
 type Query {
-    rooms: [Room!]!
-    room(id: ID!): Room
+  rooms: [Room!]!
+  room(id: ID!): Room
 }
 
 type Mutation {
-    createRoom(name: String!): Room!
-    createPlayer(name: String!): Player!
-    joinRoom(playerId: ID!, roomId: ID!): Room!
-    startGame(roomId: ID!): Room!
-    vote(playerId: ID!, option: String!): Room!
-    leaveRoom(id: ID!): Room
-    deletePlayer(id: ID!): Player
-    deleteRoom(id: ID!): Room
+  createRoom(name: String!): Room!
+  createPlayer(name: String!): Player!
+  joinRoom(playerId: ID!, roomId: ID!): Room!
+  startGame(roomId: ID!): Room!
+  vote(playerId: ID!, option: String!): Room!
+  leaveRoom(id: ID!): Room
+  deletePlayer(id: ID!): Player
+  deleteRoom(id: ID!): Room
+}
+
+type Subscription {
+  room(id: ID!): Room
 }

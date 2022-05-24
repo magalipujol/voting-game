@@ -54,11 +54,29 @@ func (r *queryResolver) Room(ctx context.Context, id string) (*model.Room, error
 	return r.RoomRepository.Get(ctx, id)
 }
 
+func (r *subscriptionResolver) Room(ctx context.Context, id string) (<-chan *model.Room, error) {
+	panic(fmt.Errorf("not implemented"))
+
+	room, err := r.RoomRepository.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	roomChannel := make(chan *model.Room)
+	go func() {
+		roomChannel <- room
+	}()
+	return roomChannel, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// Subscription returns generated.SubscriptionResolver implementation.
+func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }
