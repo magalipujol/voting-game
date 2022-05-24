@@ -1,39 +1,76 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
 
 import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
   useQuery,
-  gql
+  gql,
 } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: 'http://localhost:8080/',
+  uri: "http://localhost:8080/graphql",
   cache: new InMemoryCache(),
 });
 
-client.query({
-  query: gql`
-    query {
-      rooms {
-        id
-        players {
-          name
+let f = async () => {
+  let res = await client.mutate({
+    mutation: gql`
+      mutation CreatePlayer {
+        createPlayer(name: "agus") {
+          id
         }
-        
-        voting
       }
+    `,
+  });
+  let playerId = res.data.createPlayer.id;
+
+  res = await client.mutate({
+    mutation: gql`
+      mutation CreateRoom {
+        createRoom(name: "test") {
+          id
+        }
+      }
+    `,
+  });
+  let roomId = res.data.createRoom.id;
+
+  client.mutate({
+    mutation: gql`
+    mutation JoinRoom {
+    joinRoom(playerId: "${playerId}", roomId: "${roomId}") {
+        id
     }
-  `   	
-}).then(result => console.log(result));
+    }
+`,
+  });
+
+  client
+    .query({
+      query: gql`
+        query GetRooms {
+          rooms {
+            id
+            players {
+              name
+            }
+            voting
+          }
+        }
+      `,
+    })
+    .then((result) => console.log(result.data));
+};
+
+f();
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+  document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
