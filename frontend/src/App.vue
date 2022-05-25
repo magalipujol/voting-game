@@ -27,7 +27,6 @@ const rooms = computed(() => result.value?.rooms ?? ["error"]);
     {{ room.id }}
     </li>
   </ul>
-
 </template>
 
 <style>
