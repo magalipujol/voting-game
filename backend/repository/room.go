@@ -5,8 +5,6 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type RoomRepository interface {
@@ -21,7 +19,8 @@ type RoomRepository interface {
 }
 
 type roomRepositoryInMemory struct {
-	rooms map[string]*model.Room
+	counter int
+	rooms   map[string]*model.Room
 }
 
 func NewRoomRepository() RoomRepository {
@@ -48,12 +47,13 @@ func (r *roomRepositoryInMemory) Get(ctx context.Context, id string) (*model.Roo
 
 func (r *roomRepositoryInMemory) Create(ctx context.Context, name string) (*model.Room, error) {
 	room := &model.Room{
-		ID:      uuid.New().String(),
+		ID:      fmt.Sprintf("%d", r.counter),
 		Players: []*model.Player{},
 		Votes:   []*model.Vote{},
 		Voting:  false,
 		Options: []*model.Option{},
 	}
+	r.counter++
 	r.rooms[room.ID] = room
 	return room, nil
 }

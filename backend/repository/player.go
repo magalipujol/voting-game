@@ -4,8 +4,6 @@ import (
 	"api/graph/model"
 	"context"
 	"fmt"
-
-	"github.com/google/uuid"
 )
 
 type PlayerRepository interface {
@@ -15,6 +13,7 @@ type PlayerRepository interface {
 }
 
 type playerRepositoryInMemory struct {
+	counter int
 	players map[string]*model.Player
 }
 
@@ -26,9 +25,10 @@ func NewPlayerRepository() PlayerRepository {
 
 func (r *playerRepositoryInMemory) Create(ctx context.Context, name string) (*model.Player, error) {
 	player := &model.Player{
-		ID:   uuid.New().String(),
+		ID:   fmt.Sprintf("%d", r.counter),
 		Name: name,
 	}
+	r.counter++
 	r.players[player.ID] = player
 	return player, nil
 }
