@@ -1,9 +1,8 @@
 <script setup>
 
-import { watch, computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import {useQuery} from '@vue/apollo-composable'
 import gql from 'graphql-tag'
-console.log("AAAAAAAAAAAAAAAAAAA")
 
 const allRoomsQuery = gql`
   query {
@@ -12,26 +11,23 @@ const allRoomsQuery = gql`
       players {
         name
       }
-      votes
       voting
     }
   }
 `;
 
 const { result } = useQuery(allRoomsQuery);
-console.log("BBBBBBBBBBBBBBBB")
-const rooms = computed(() => result ?? {})
-console.log(rooms)
-
- watch(rooms, value => {
-   console.log("Mirando")
-      console.log(value)
-    })
-console.log("CCCCCCCCCCCC")
+const rooms = computed(() => result.value?.rooms ?? ["error"]);
 
 </script>
 
 <template>
+  <ul>
+    <li v-for="room in rooms" :key="room.id" >
+    {{ room.id }}
+    </li>
+  </ul>
+
 </template>
 
 <style>

@@ -10,11 +10,8 @@ const cache = new InMemoryCache()
 
 
 const apolloClient = new ApolloClient({
-  uri: 'http://localhost:8080/',
-  cache,
-  fetchOptions: {
-      mode: 'no-cors'
-  }
+    uri: 'http://localhost:8080/graphql',
+    cache,
 })
 
 
