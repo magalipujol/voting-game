@@ -1,6 +1,9 @@
 package graph
 
-import "api/repository"
+import (
+	"api/graph/model"
+	"api/repository"
+)
 
 // This file will not be regenerated automatically.
 //
@@ -9,4 +12,5 @@ import "api/repository"
 type Resolver struct {
 	PlayerRepository repository.PlayerRepository
 	RoomRepository   repository.RoomRepository
+	RoomObservers    map[string]chan *model.Room
 }

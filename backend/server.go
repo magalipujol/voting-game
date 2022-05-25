@@ -3,6 +3,7 @@ package main
 import (
 	"api/graph"
 	"api/graph/generated"
+	"api/graph/model"
 	"api/repository"
 	"net/http"
 
@@ -23,12 +24,12 @@ func main() {
 		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:8080"},
 		AllowCredentials: true,
 		Debug:            true,
-		// AllowedMethods:   []string{"GET", "POST"},
 	}).Handler)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
 		PlayerRepository: repository.NewPlayerRepository(),
 		RoomRepository:   repository.NewRoomRepository(),
+		RoomObservers:    make(map[string]chan *model.Room),
 	}}))
 	srv.AddTransport(&transport.Websocket{
 		Upgrader: websocket.Upgrader{
@@ -36,8 +37,6 @@ func main() {
 				// Check against your desired domains here
 				return true
 			},
-			ReadBufferSize:  1024,
-			WriteBufferSize: 1024,
 		},
 	})
 

@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type RoomRepository interface {
@@ -46,7 +48,7 @@ func (r *roomRepositoryInMemory) Get(ctx context.Context, id string) (*model.Roo
 
 func (r *roomRepositoryInMemory) Create(ctx context.Context, name string) (*model.Room, error) {
 	room := &model.Room{
-		ID:      fmt.Sprintf("%d", len(r.rooms)+1),
+		ID:      uuid.New().String(),
 		Players: []*model.Player{},
 		Votes:   []*model.Vote{},
 		Voting:  false,

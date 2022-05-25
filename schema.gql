@@ -25,7 +25,7 @@ type Vote {
 
 type Query {
   rooms: [Room!]!
-  room(id: ID!): Room
+  room(id: ID!): Room!
 }
 
 type Mutation {

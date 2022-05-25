@@ -8,6 +8,9 @@ import (
 	"api/graph/model"
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 func (r *mutationResolver) CreateRoom(ctx context.Context, name string) (*model.Room, error) {
@@ -55,16 +58,30 @@ func (r *queryResolver) Room(ctx context.Context, id string) (*model.Room, error
 }
 
 func (r *subscriptionResolver) Room(ctx context.Context, id string) (<-chan *model.Room, error) {
-	panic(fmt.Errorf("not implemented"))
-
 	room, err := r.RoomRepository.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
+
 	roomChannel := make(chan *model.Room)
+	// create random uuid
+	observerId := uuid.New().String()
 	go func() {
-		roomChannel <- room
+		<-ctx.Done()
+		delete(r.RoomObservers, observerId)
 	}()
+
+	go func() {
+		for i := 0; i < 3; i++ {
+			time.Sleep(time.Second * 1)
+			room.Voting = !room.Voting
+			roomChannel <- room
+		}
+	}()
+
+	r.RoomObservers[observerId] = roomChannel
+
+	roomChannel <- room
 	return roomChannel, nil
 }
 

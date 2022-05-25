@@ -4,6 +4,8 @@ import (
 	"api/graph/model"
 	"context"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type PlayerRepository interface {
@@ -24,7 +26,7 @@ func NewPlayerRepository() PlayerRepository {
 
 func (r *playerRepositoryInMemory) Create(ctx context.Context, name string) (*model.Player, error) {
 	player := &model.Player{
-		ID:   fmt.Sprintf("%d", len(r.players)+1),
+		ID:   uuid.New().String(),
 		Name: name,
 	}
 	r.players[player.ID] = player

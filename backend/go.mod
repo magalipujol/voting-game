@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/99designs/gqlgen v0.17.5
 	github.com/go-chi/chi v1.5.4
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/rs/cors v1.8.2
 	github.com/vektah/gqlparser/v2 v2.4.2
