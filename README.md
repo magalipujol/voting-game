@@ -1,5 +1,8 @@
 # voting-game
-
+### backend commands
+inside backend folder
+- install packages ```go mod tidy```
+- run backend ```go run .```
 ### frontend commands
 - run application ```npm run dev```
 
