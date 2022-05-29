@@ -3,7 +3,7 @@ import App from './App.vue'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import ApolloClient from 'apollo-boost'
 import { DefaultApolloClient } from '@vue/apollo-composable'
-
+import { createApolloProvider } from '@vue/apollo-option'
 
 const cache = new InMemoryCache()
 
@@ -13,12 +13,13 @@ const apolloClient = new ApolloClient({
     cache,
 })
 
+const apolloProvider = createApolloProvider({
+    defaultClient: apolloClient,
+})
 
 const app = createApp({
-    setup() {
-        provide(DefaultApolloClient, apolloClient)
-    },
     render: () => h(App)
 })
 
+app.use(apolloProvider)
 app.mount('#app')

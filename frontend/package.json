@@ -10,6 +10,7 @@
   "dependencies": {
     "@apollo/client": "^3.6.4",
     "@vue/apollo-composable": "^4.0.0-alpha.17",
+    "@vue/apollo-option": "^4.0.0-alpha.17",
     "apollo-boost": "^0.4.9",
     "apollo-cache-inmemory": "^1.6.6",
     "apollo-client": "^2.6.10",
