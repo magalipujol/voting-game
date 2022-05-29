@@ -1,11 +1,7 @@
 <script>
-import { computed } from 'vue'
-import { useQuery } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
-import { provide } from 'vue'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import ApolloClient from 'apollo-boost'
-import { DefaultApolloClient } from '@vue/apollo-composable'
 
 const cache = new InMemoryCache()
 
@@ -28,36 +24,25 @@ const allRoomsQuery = gql`
   }
 `;
 
- export default {
-     apollo: {
-         rooms: allRoomsQuery
-     },
-     data() {
-         return {
-             rooms: Array
+export default {
+    apollo: {
+        rooms: {
+            query: allRoomsQuery,
+            error() {
+                this.error = true
+            }
         }
     },
-    // setup() {
-    //     provide(DefaultApolloClient, apolloClient)
-    //     const { result } = useQuery(allRoomsQuery);
-    //     rooms = computed(() => result.value?.rooms ?? ["error"]);
-    // }
-    // computed: {
-    //     rooms: rooms
-    // },
-    // methods: {
-    //     joinRoom(roomId) {
-    //         this.$router.push({
-    //             name: 'room',
-    //             params: {
-    //                 roomId: roomId
-    //             }
-    //         })
-    //     }
-    // }
- }
+    data() {
+        return {
+            rooms: Array,
+            error: false,
+        }
+    },
+}
 </script>
 <template>
+    <p v-if="$apollo.queries.rooms.loading">Loading...</p>
     <ul>
         <li v-for="room in rooms" :key="room.id">
             {{ room.id }}
