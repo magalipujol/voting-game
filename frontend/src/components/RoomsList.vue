@@ -27,16 +27,12 @@ const allRoomsQuery = gql`
 export default {
     apollo: {
         rooms: {
-            query: allRoomsQuery,
-            error() {
-                this.error = true
-            }
+            query: allRoomsQuery
         }
     },
     data() {
         return {
             rooms: Array,
-            error: false,
         }
     },
 }
